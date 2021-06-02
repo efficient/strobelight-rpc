@@ -1,0 +1,3 @@
+[submodule "libinger"]
+	path = libinger
+	url = ../libinger

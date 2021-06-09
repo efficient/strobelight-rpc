@@ -4,4 +4,9 @@ version = "0.0.0"
 edition = "2018"
 [dependencies.inger]
 path = "../libinger"
-
+[[bin]]
+name = "main"
+path = "src/main.rs"
+[[bin]]
+name = "q"
+path = "src/q.rs"

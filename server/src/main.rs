@@ -1,6 +1,14 @@
-fn h(_s : std::net::TcpStream) -> std::io::Result<()>
+fn h(_s : std::net::TcpStream)
 {
-   inger::launch(|| println!("Launched ! ! !"), u64::max_value()).map(|_| ())
+   let f = inger::launch(|| {
+       println!("Launched ! ! !");
+       while true {}
+   }, u64::max_value());
+    if let Err (error) = f
+    {
+        eprintln!("ERROR: in launched function :{}",error)
+    }
+
 }
 
 
@@ -10,7 +18,8 @@ fn main() -> std::io::Result<()>{
     
    for s in listener.incoming()
    {
-       h(s?)?;
+       let s = s?;
+       std::thread::spawn(|| h(s));
    }
    Ok(())
 }

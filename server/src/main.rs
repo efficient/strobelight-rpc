@@ -1,7 +1,10 @@
 use std::io::prelude::*;
 use std::net::TcpStream; //I don't think I need this
 
-fn fib(n: u8) -> u64 {
+
+
+//Func ID : 0
+fn fib(n: u64) -> u64 {
 
    if n == 0 {
       return 1;
@@ -14,22 +17,37 @@ fn fib(n: u8) -> u64 {
 }
 
 
+//Func ID : 1
+fn add2(n: u64) -> u64 {
+   n + 2
+}
+
+
+
 fn handle(mut s : std::net::TcpStream) {
 
-    let mut arg_buf = [0 as u8;1];
-    s.read(&mut arg_buf); //Read incoming arguments for fib
+    let mut s = std::io::BufReader::new(s);
+    let mut data = String::default();
+    println!("The string before {}",data);
+    s.read_line(&mut data); //Read all incoming args; seperated by '\n'
+    data.pop();
+    println!("The string afert {}",data);
+    let func_id  = data.parse().unwrap();
+    data.clear();
+    s.read_line(&mut data); //Read all incoming args; seperated by '\n'
+    data.pop();
+    let func_arg = data.parse().unwrap();
+    let func = match func_id {
+        0 => fib,
+        1 => add2,
+        _ => fib,
+    };
 
-    let mut x = 0;  //If no args, return fib(0)
-    if let Some(&y) = arg_buf.get(0)
-    {
-        x = y
-    }
-
+    println!("func_id is {} func_arg is {}",func_id,func_arg);
     let f = inger::launch(|| {
-        let ans = fib(x);
-        println!("fib of {} is {}",x,ans);
-        s.write(& ans.to_be_bytes()).unwrap();
-        loop {}
+        let ans = func(func_arg);
+        println!("ans of input {} is {}",func_arg,ans);
+        s.get_mut().write(format!("{}",ans).as_ref()).unwrap();
     }, 4000);
 
     if let Err (error) = f

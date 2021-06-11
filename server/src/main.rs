@@ -3,25 +3,6 @@ use std::net::TcpStream; //I don't think I need this
 
 
 
-//Func ID : 0
-fn fib(n: u64) -> u64 {
-
-   if n == 0 {
-      return 1;
-   }
-   if n == 1 {
-      return 1;
-   }
-
-   fib(n - 1) + fib(n - 2)
-}
-
-
-//Func ID : 1
-fn add2(n: u64) -> u64 {
-   n + 2
-}
-
 
 
 fn handle(mut s : std::net::TcpStream) {
@@ -38,9 +19,9 @@ fn handle(mut s : std::net::TcpStream) {
     data.pop();
     let func_arg = data.parse().unwrap();
     let func = match func_id {
-        0 => fib,
-        1 => add2,
-        _ => fib,
+        0 => funs::fib,
+        1 => funs::add2,
+        _ => funs::fib,
     };
 
     println!("func_id is {} func_arg is {}",func_id,func_arg);

@@ -27,13 +27,15 @@ fn handle(mut s : std::net::TcpStream) {
     println!("func_id is {} func_arg is {}",func_id,func_arg);
     let f = inger::launch(|| {
         let ans = func(func_arg);
-        println!("ans of input {} is {}",func_arg,ans);
         s.get_mut().write(format!("{}",ans).as_ref()).unwrap();
     }, 4000);
 
     if let Err (error) = f
     {
          eprintln!("ERROR: in launched function :{}",error)
+    }
+    else if f.unwrap().is_continuation() {
+        eprintln!("WARNING: FUNCTION TIMEDOUT!");
     }
 
 }

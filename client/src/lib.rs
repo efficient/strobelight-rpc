@@ -16,7 +16,6 @@ pub fn rpc_client<T: Iterator<Item = String>>(mut args: T) -> std::io::Result<()
 
     let mut s = std::net::TcpStream::connect(&address)?;
 
-
     //write args; seperate by '\n'
     s.write((&func_id).as_bytes())?;
     s.write((&"\n").as_bytes());

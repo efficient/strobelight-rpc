@@ -1,6 +1,5 @@
 use std::io::prelude::*;
 use std::net::TcpStream;
-use std::str::FromStr;
 const ADDRESS: &str = "127.0.0.1:2000";
 
 
@@ -14,15 +13,15 @@ pub fn rpc_client<'a, T: Iterator<Item = &'a str>>(mut args: T) -> std::io::Resu
         address = address_a;
     }
 
-    let mut s = std::net::TcpStream::connect(&address)?;
+    let mut s = TcpStream::connect(&address)?;
 
     //write args; seperate by '\n'
     s.write((&func_id).as_bytes())?;
-    s.write((&"\n").as_bytes());
+    s.write((&"\n").as_bytes())?;
     s.write((&func_arg).as_bytes())?;
-    s.write((&"\n").as_bytes());
+    s.write((&"\n").as_bytes())?;
     let mut ans_buf = String::default();
-    s.read_to_string(&mut ans_buf);
+    s.read_to_string(&mut ans_buf)?;
     Ok(())
 }
 

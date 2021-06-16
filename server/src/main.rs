@@ -22,17 +22,20 @@ fn handle(s : TcpStream) -> Result<(),Box<dyn Display>> {
     };
 
     //println!("func_id is {} func_arg is {}",func_id,func_arg);
-    let f = inger::launch(|| {
-        let ans = func(func_arg);
-        s.get_mut().write(format!("{}",ans).as_ref()).unwrap();
-    }, 4000);
+    let f = inger::launch(|| func(func_arg), 4000);
 
-    if let Err (error) = f {
-         eprintln!("ERROR: in launched function :{}",error)
+    match f {
+        Ok(ans) => {
+            if let inger::Linger::Completion(ans) = ans {
+                s.get_mut().write(format!("{}",ans).as_ref()).map_err(box_error)?;
+        }
+            else {
+                eprintln!("FUNCTION TIMEOUT");
+            }
+        },
+        Err(error) => eprintln!("ERROR: in LIBINGER {}",error),
     }
-    else if f.unwrap().is_continuation() {
-        eprintln!("WARNING: FUNCTION TIMEDOUT!");
-    }
+
     Ok(())
 }
 

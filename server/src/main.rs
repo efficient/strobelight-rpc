@@ -9,10 +9,10 @@ fn handle(mut s : std::net::TcpStream) {
 
     let mut s = std::io::BufReader::new(s);
     let mut data = String::default();
-    println!("The string before {}",data);
+    //println!("The string before {}",data);
     s.read_line(&mut data); //Read all incoming args; seperated by '\n'
     data.pop();
-    println!("The string afert {}",data);
+    //println!("The string afert {}",data);
     let func_id  = data.parse().unwrap();
     data.clear();
     s.read_line(&mut data); //Read all incoming args; seperated by '\n'
@@ -24,7 +24,7 @@ fn handle(mut s : std::net::TcpStream) {
         _ => funs::fib,
     };
 
-    println!("func_id is {} func_arg is {}",func_id,func_arg);
+    //println!("func_id is {} func_arg is {}",func_id,func_arg);
     let f = inger::launch(|| {
         let ans = func(func_arg);
         s.get_mut().write(format!("{}",ans).as_ref()).unwrap();

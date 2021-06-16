@@ -7,7 +7,7 @@ fn fib_local(var: &mut bencher::Bencher) {
 
 fn fib_remote(var: &mut bencher::Bencher) {
     let args = vec![("localhost:2000"),("0"),("15")].into_iter();
-    var.iter(|| client::rpc_client(args.clone()));
+    var.iter(|| client::rpc_client(args.clone()).unwrap());
 }
 
 bencher::benchmark_group![client,fib_local,fib_remote];

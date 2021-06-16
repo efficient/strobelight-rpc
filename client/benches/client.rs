@@ -1,5 +1,3 @@
-use std::borrow::Borrow;
-
 
 fn fib_local(var: &mut bencher::Bencher) {
     var.iter(|| funs::fib(15));
@@ -8,9 +6,8 @@ fn fib_local(var: &mut bencher::Bencher) {
 
 
 fn fib_remote(var: &mut bencher::Bencher) {
-    let conv = String::from;
-    let args = vec!(conv("localhost:2000"),conv("0"),conv("15")).into_iter();
-    var.iter(|| client::rpc_client(args.borrow().clone()));
+    let args = vec![("localhost:2000"),("0"),("15")].into_iter();
+    var.iter(|| client::rpc_client(args.clone()));
 }
 
 bencher::benchmark_group![client,fib_local,fib_remote];

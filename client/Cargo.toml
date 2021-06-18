@@ -2,6 +2,10 @@
 name = "client"
 version = "0.0.0"
 edition = "2018"
+serde = "1.0.126"
+
+[dependencies.serde]
+serde = "1.0.126"
 
 [dev-dependencies.funs]
 path = "../funs"

@@ -1,33 +1,40 @@
 use std::fmt::Display;
 use std::io::prelude::*;
 use std::net::TcpStream;
-use log::debug;
+use log::{debug,error,info};
 
 fn handle(s : TcpStream) -> Result<(),Box<dyn Display>> {
 
     let mut s = std::io::BufReader::new(s);
     let mut data = String::default();
-    s.read_line(&mut data).map_err(box_error)?; //Read all incoming args; seperated by '\n'
+    s.read_line(&mut data).map_err(box_error)?;
     data.pop();
-    let func_id  = data.parse().map_err(box_error)?;
+    let func_id: i64  = data.parse().map_err(box_error)?;
     data.clear();
-    s.read_line(&mut data).map_err(box_error)?; //Read all incoming args; seperated by '\n'
+    s.read_line(&mut data).map_err(box_error)?;
     data.pop();
     let func_arg = data.parse().map_err(box_error)?;
     data.clear();
-    s.read_line(&mut data).map_err(box_error)?; //Read all incoming args; seperated by '\n'
+    s.read_line(&mut data).map_err(box_error)?;
     data.pop();
-    let func_timeout: u64 = data.parse().map_err(box_error)?;
+    let func_timeout: u64 = data.parse().map_err(box_error)?; //NOTE: The typechecker needed explcit type anno. for parse()
 
-    let func = match func_id {
-        0 => funs::fib,
-        1 => funs::add2,
+    let func = match func_id.abs() {
+        1 => funs::fib,
+        2 => funs::add2,
         _ => funs::fib,
     };
 
-    debug!("function with func_id {} with args {} and specefied timeout
-           {} has...", func_id,func_arg,func_timeout);
-    //println!("func_id is {} func_arg is {}",func_id,func_arg);
+    debug!("function with func_id {} with args {} and func timeout {} has..."
+           ,func_id,func_arg,func_timeout);
+
+    if func_id < 0 {    //for all negative func_ids, the server runs them outside inger
+        debug!("function with ID {} ran without inger!",func_id.abs());
+        let ans = func(func_arg);
+        s.get_mut().write(format!("{}",ans).as_ref()).map_err(box_error)?;
+        return Ok(())
+    }
+
     let f = inger::launch(|| func(func_arg), func_timeout);
 
     match f {
@@ -35,12 +42,12 @@ fn handle(s : TcpStream) -> Result<(),Box<dyn Display>> {
             if let inger::Linger::Completion(ans) = ans {
                 s.get_mut().write(format!("{}",ans).as_ref()).map_err(box_error)?;
                 debug!("Yeilded the answer {}",ans);
-        }
+            }
             else {
-                eprintln!("TIMEDOUT");
+                info!("TIMEDOUT");
             }
         },
-        Err(error) => eprintln!("ERROR: in LIBINGER {}",error),
+        Err(error) => error!("ERROR: in LIBINGER {}",error),
     }
 
     Ok(())

@@ -25,7 +25,6 @@ pub fn rpc_client<'a, T: Iterator<Item = &'a str>>(mut args: T) -> std::io::Resu
     s.write(format!("{}","\n").as_ref())?;
     let mut ans_buf = String::default();
     s.read_to_string(&mut ans_buf)?;
-    println!("done! {}",ans_buf);
     Ok(())
 }
 

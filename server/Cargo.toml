@@ -9,15 +9,15 @@ path = "../funs"
 [dependencies.inger]
 path = "../libinger"
 
-[dependencies.log]
+[dependencies]
+env_logger = "0.8.4"
 log = { version = "0.4.14", features = ["max_level_debug", "release_max_level_warn"]}
-
-[dependencies.serde]
 serde = "1.0.126"
 
 [[bin]]
 name = "main"
 path = "src/main.rs"
+
 [[bin]]
 name = "q"
 path = "src/q.rs"

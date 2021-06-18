@@ -1,6 +1,7 @@
 use std::fmt::Display;
 use std::io::prelude::*;
 use std::net::TcpStream;
+use log::debug;
 
 fn handle(s : TcpStream) -> Result<(),Box<dyn Display>> {
 
@@ -21,6 +22,7 @@ fn handle(s : TcpStream) -> Result<(),Box<dyn Display>> {
         _ => funs::fib,
     };
 
+    debug!("function with func_id {} with args {} has...", func_id,func_arg);
     //println!("func_id is {} func_arg is {}",func_id,func_arg);
     let f = inger::launch(|| func(func_arg), 4000);
 
@@ -28,9 +30,10 @@ fn handle(s : TcpStream) -> Result<(),Box<dyn Display>> {
         Ok(ans) => {
             if let inger::Linger::Completion(ans) = ans {
                 s.get_mut().write(format!("{}",ans).as_ref()).map_err(box_error)?;
+                debug!("Yeilded the answer {}",ans);
         }
             else {
-                eprintln!("FUNCTION TIMEOUT");
+                eprintln!("TIMEDOUT");
             }
         },
         Err(error) => eprintln!("ERROR: in LIBINGER {}",error),
@@ -52,12 +55,12 @@ fn handle_wrapper(s: TcpStream) {
 }
 
 fn main() -> std::io::Result<()> {
-	
-   let listener =  std::net::TcpListener::bind("0.0.0.0:2000")?;
-    
-   for s in listener.incoming() {
-       let s = s?;
-       std::thread::spawn(|| handle_wrapper(s));
-   }
-   Ok(())
+
+    env_logger::init();
+    let listener =  std::net::TcpListener::bind("0.0.0.0:2000")?;
+    for s in listener.incoming() {
+        let s = s?;
+        std::thread::spawn(|| handle_wrapper(s));
+    }
+    Ok(())
 }

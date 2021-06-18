@@ -7,24 +7,28 @@ fn handle(s : TcpStream) -> Result<(),Box<dyn Display>> {
 
     let mut s = std::io::BufReader::new(s);
     let mut data = String::default();
-    //println!("The string before {}",data);
     s.read_line(&mut data).map_err(box_error)?; //Read all incoming args; seperated by '\n'
     data.pop();
-    //println!("The string afert {}",data);
     let func_id  = data.parse().map_err(box_error)?;
     data.clear();
     s.read_line(&mut data).map_err(box_error)?; //Read all incoming args; seperated by '\n'
     data.pop();
     let func_arg = data.parse().map_err(box_error)?;
+    data.clear();
+    s.read_line(&mut data).map_err(box_error)?; //Read all incoming args; seperated by '\n'
+    data.pop();
+    let func_timeout: u64 = data.parse().map_err(box_error)?;
+
     let func = match func_id {
         0 => funs::fib,
         1 => funs::add2,
         _ => funs::fib,
     };
 
-    debug!("function with func_id {} with args {} has...", func_id,func_arg);
+    debug!("function with func_id {} with args {} and specefied timeout
+           {} has...", func_id,func_arg,func_timeout);
     //println!("func_id is {} func_arg is {}",func_id,func_arg);
-    let f = inger::launch(|| func(func_arg), 4000);
+    let f = inger::launch(|| func(func_arg), func_timeout);
 
     match f {
         Ok(ans) => {

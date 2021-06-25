@@ -1,11 +1,26 @@
+use log::{debug,error,info};
+use serde::{Serialize, Deserialize};
 use std::fmt::Display;
 use std::io::prelude::*;
 use std::net::TcpStream;
-use log::{debug,error,info};
+
+
+#[derive(Serialize, Deserialize,Debug)]
+struct IngerRequest<'a> {
+    func_id: &'a str,
+    func_arg: &'a str,     //In the future, might need to change this to a generic queue
+    func_timeout: &'a str,
+}
 
 fn handle(s : TcpStream) -> Result<(),Box<dyn Display>> {
 
     let mut s = std::io::BufReader::new(s);
+    let mut data = String::default();
+    s.read_line(&mut data).map_err(box_error)?;
+    let request: IngerRequest = serde_json::from_str(&data).map_err(box_error)?;
+    debug!("done parsing inger");
+    debug!("{} {} {}",request.func_id,request.func_arg,request.func_timeout);
+    /*
     let mut data = String::default();
     s.read_line(&mut data).map_err(box_error)?;
     data.pop();
@@ -49,7 +64,7 @@ fn handle(s : TcpStream) -> Result<(),Box<dyn Display>> {
         },
         Err(error) => error!("ERROR: in LIBINGER {}",error),
     }
-
+*/
     Ok(())
 }
 

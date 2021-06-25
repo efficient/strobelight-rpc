@@ -1,11 +1,10 @@
 use std::io::prelude::*;
 use serde::{Deserialize, Serialize};
-use serde_json::Result;
 use std::net::TcpStream;
 const ADDRESS: &str = "127.0.0.1:2000";
 
-#[derive(Serialize, Deserialize)]
-struct IngerRequest<'a> {
+#[derive(Serialize, Deserialize,Debug)]
+pub struct  IngerRequest<'a> {
     func_id: &'a str,
     func_arg: &'a str,     //In the future, might need to change this to a generic queue
     func_timeout: &'a str,
@@ -22,20 +21,11 @@ pub fn rpc_client<'a, T: Iterator<Item = &'a str>>(mut args: T) -> std::io::Resu
     if let Some(address_a) = input_address {
         address = address_a;
     }
-
     let mut s = TcpStream::connect(&address)?;
+    s.write(format!(r#"{}"#,serde_json::to_string(&request).unwrap()).as_ref()).unwrap();
 
-    //write args; seperate by '\n'
-    /*
-    s.write(format!("{}",func_id).as_ref())?;
-    s.write(format!("{}","\n").as_ref())?;
-    s.write(format!("{}",func_arg).as_ref())?;
-    s.write(format!("{}","\n").as_ref())?;
-    s.write(format!("{}",func_timeout).as_ref())?;
-    s.write(format!("{}","\n").as_ref())?;
-    */
     let mut ans_buf = String::default();
-    s.read_to_string(&mut ans_buf)?;
+    //s.read_to_string(&mut ans_buf)?;
     Ok(())
 }
 

@@ -19,7 +19,7 @@ fn handle(s : TcpStream) -> Result<(),Box<dyn Display>> {
     s.read_line(&mut data).map_err(box_error)?;
     let request: IngerRequest = serde_json::from_str(&data).map_err(box_error)?;
 
-    debug!("done parsing inger");
+    debug!("done parsing struct");
     debug!("{} {} {}",request.func_id,request.func_arg,request.func_timeout);
 
     let func_id: i64 = request.func_id.parse().map_err(box_error)?;

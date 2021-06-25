@@ -8,7 +8,7 @@ use std::net::TcpStream;
 #[derive(Serialize, Deserialize,Debug)]
 struct IngerRequest<'a> {
     func_id: &'a str,
-    func_arg: &'a str,     //In the future, might need to change this to a generic queue
+    func_arg: &'a str,
     func_timeout: &'a str,
 }
 
@@ -18,9 +18,14 @@ fn handle(s : TcpStream) -> Result<(),Box<dyn Display>> {
     let mut data = String::default();
     s.read_line(&mut data).map_err(box_error)?;
     let request: IngerRequest = serde_json::from_str(&data).map_err(box_error)?;
+
     debug!("done parsing inger");
     debug!("{} {} {}",request.func_id,request.func_arg,request.func_timeout);
-    /*
+
+    let func_id: i64 = request.func_id.parse().map_err(box_error)?;
+    let func_arg: u64 = request.func_arg.parse().map_err(box_error)?;
+    let func_timeout: u64 = request.func_timeout.parse().map_err(box_error)?;
+    /* Dead code; should probably throw out
     let mut data = String::default();
     s.read_line(&mut data).map_err(box_error)?;
     data.pop();
@@ -33,7 +38,7 @@ fn handle(s : TcpStream) -> Result<(),Box<dyn Display>> {
     s.read_line(&mut data).map_err(box_error)?;
     data.pop();
     let func_timeout: u64 = data.parse().map_err(box_error)?; //NOTE: The typechecker needed explcit type anno. for parse()
-
+    */
     let func = match func_id.abs() {
         1 => funs::fib,
         2 => funs::add2,
@@ -59,12 +64,11 @@ fn handle(s : TcpStream) -> Result<(),Box<dyn Display>> {
                 debug!("Yeilded the answer {}",ans);
             }
             else {
-                info!("TIMEDOUT");
+                info!("TIMED-OUT");
             }
         },
-        Err(error) => error!("ERROR: in LIBINGER {}",error),
+        Err(error) => error!("ERROR: caused by LIBINGER? {}",error),
     }
-*/
     Ok(())
 }
 

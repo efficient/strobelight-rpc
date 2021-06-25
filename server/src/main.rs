@@ -9,7 +9,7 @@ fn handle(s : TcpStream) -> Result<(),Box<dyn Display>> {
     let mut data = String::default();
     s.read_line(&mut data).map_err(box_error)?;
     data.pop();
-    let func_id: i64  = data.parse().map_err(box_error)?;
+    let func_id: i64 = data.parse().map_err(box_error)?;
     data.clear();
     s.read_line(&mut data).map_err(box_error)?;
     data.pop();

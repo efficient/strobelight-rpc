@@ -24,10 +24,10 @@ pub fn rpc_client<'a, T: Iterator<Item = &'a str>>(mut args: T) -> std::io::Resu
     }
 
     let mut s = TcpStream::connect(&address)?;
-    s.write(format!(r#"{}"#,serde_json::to_string(&request).unwrap()).as_ref()).unwrap();
-
+    s.write(format!("{}\n",serde_json::to_string(&request).unwrap()).as_ref()).unwrap();
     let mut ans_buf = String::default();
-    //s.read_to_string(&mut ans_buf)?; Something gets blocked when uncomenting this line?
+    s.read_to_string(&mut ans_buf)?;
+    println!("{}",ans_buf);
     Ok(())
 }
 

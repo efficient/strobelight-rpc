@@ -17,20 +17,6 @@ fn handle(s : TcpStream) -> Result<(),Box<dyn Display>> {
     let func_id: i64 = request.func_id.parse().map_err(box_error)?;
     let func_arg: u64 = request.func_arg.parse().map_err(box_error)?;
     let func_timeout: u64 = request.func_timeout.parse().map_err(box_error)?;
-    /* Dead code; should probably throw out
-    let mut data = String::default();
-    s.read_line(&mut data).map_err(box_error)?;
-    data.pop();
-    let func_id: i64 = data.parse().map_err(box_error)?;
-    data.clear();
-    s.read_line(&mut data).map_err(box_error)?;
-    data.pop();
-    let func_arg = data.parse().map_err(box_error)?;
-    data.clear();
-    s.read_line(&mut data).map_err(box_error)?;
-    data.pop();
-    let func_timeout: u64 = data.parse().map_err(box_error)?; //NOTE: The typechecker needed explcit type anno. for parse()
-    */
     let func = match func_id.abs() {
         1 => funs::fib,
         2 => funs::add2,

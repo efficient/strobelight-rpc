@@ -10,7 +10,7 @@ struct  IngerRequest<'a> {
     func_timeout: &'a str,
 }
 
-pub fn rpc_client<'a, T: Iterator<Item = &'a str>>(mut args: T) -> std::io::Result<()> {
+pub fn rpc_client<'a, T: Iterator<Item = &'a str>>(mut args: T) -> std::io::Result<String> {
     let input_address = args.next();           //An address
     let request = IngerRequest {
         func_id: args.next().unwrap_or("0"), //A u64 to be sent
@@ -27,7 +27,6 @@ pub fn rpc_client<'a, T: Iterator<Item = &'a str>>(mut args: T) -> std::io::Resu
     s.write(format!("{}\n",serde_json::to_string(&request).unwrap()).as_ref()).unwrap();
     let mut ans_buf = String::default();
     s.read_to_string(&mut ans_buf)?;
-    println!("{}",ans_buf);
-    Ok(())
+    Ok(ans_buf)
 }
 

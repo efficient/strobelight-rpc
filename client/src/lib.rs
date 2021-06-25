@@ -1,14 +1,7 @@
+use funs::IngerRequest;
 use std::io::prelude::*;
-use serde::{Deserialize, Serialize};
 use std::net::TcpStream;
 const ADDRESS: &str = "127.0.0.1:2000";
-
-#[derive(Serialize, Deserialize,Debug)]
-struct  IngerRequest<'a> {
-    func_id: &'a str,
-    func_arg: &'a str,     //In the future, might need to change this to a generic queue
-    func_timeout: &'a str,
-}
 
 pub fn rpc_client<'a, T: Iterator<Item = &'a str>>(mut args: T) -> std::io::Result<String> {
     let input_address = args.next();           //An address

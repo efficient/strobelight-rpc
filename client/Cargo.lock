@@ -12,13 +12,15 @@ version = "0.0.0"
 dependencies = [
  "bencher",
  "funs",
- "serde",
  "serde_json",
 ]
 
 [[package]]
 name = "funs"
 version = "0.0.0"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "itoa"

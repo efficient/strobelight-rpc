@@ -42,6 +42,9 @@ dependencies = [
 [[package]]
 name = "funs"
 version = "0.0.0"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "gotcha"
@@ -179,7 +182,6 @@ dependencies = [
  "funs",
  "inger",
  "log",
- "serde",
  "serde_json",
 ]
 

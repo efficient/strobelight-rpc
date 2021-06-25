@@ -1,16 +1,8 @@
+use funs::IngerRequest;
 use log::{debug,error,info};
-use serde::{Serialize, Deserialize};
 use std::fmt::Display;
 use std::io::prelude::*;
 use std::net::TcpStream;
-
-
-#[derive(Serialize, Deserialize,Debug)]
-struct IngerRequest<'a> {
-    func_id: &'a str,
-    func_arg: &'a str,
-    func_timeout: &'a str,
-}
 
 fn handle(s : TcpStream) -> Result<(),Box<dyn Display>> {
 

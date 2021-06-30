@@ -1,11 +1,13 @@
 use funs::IngerRequest;
 use log::{debug,error,info};
+use std::collections::HashMap;
 use std::fmt::Display;
 use std::io::prelude::*;
 use std::net::TcpStream;
-
-fn handle(s : TcpStream) -> Result<(),Box<dyn Display>> {
-
+use std::sync::{Arc, Mutex, MutexGuard};
+use std::string::String;
+fn handle(s: TcpStream, mut shared_ingers: MutexGuard<HashMap<String,String>>)
+          -> Result<(),Box<dyn Display>> {
     let mut s = std::io::BufReader::new(s);
     let mut data = String::default();
     s.read_line(&mut data).map_err(box_error)?;
@@ -42,7 +44,8 @@ fn handle(s : TcpStream) -> Result<(),Box<dyn Display>> {
                 debug!("Yeilded the answer {}",ans);
             }
             else {
-                info!("TIMED-OUT");
+                info!("TIMED-OUT"); //This is where the mutex needs to be used
+                shared_ingers.insert(String::default(),data);
             }
         },
         Err(error) => error!("ERROR: caused by LIBINGER? {}",error),
@@ -55,20 +58,25 @@ fn box_error<'a,T: Display + 'a>(e: T) -> Box<dyn Display + 'a> {
     Box::new(e)
 }
 
-fn handle_wrapper(s: TcpStream) {
+fn handle_wrapper(s: TcpStream, stored_ingers: MutexGuard<HashMap<String,String>>) {
 
-    if let Err(e) = handle(s) {
+    if let Err(e) = handle(s, stored_ingers) {
         eprintln!("ERROR: {}",e);
     }
 }
 
 fn main() -> std::io::Result<()> {
-
+                        /*The map is String -> ingers, but I have no idea why Continuation (return type?) needs a type arg; TODO: ask Sol*/
+    let stored_ingers: Arc<Mutex<HashMap<String,String>>> = Arc::new(Mutex::new(HashMap::new()));
     env_logger::init();
     let listener =  std::net::TcpListener::bind("0.0.0.0:2000")?;
     for s in listener.incoming() {
         let s = s?;
-        std::thread::spawn(|| handle_wrapper(s));
+        let shared_cpy = Arc::clone(&stored_ingers);
+        std::thread::spawn(move || {
+            let locked_cpy = shared_cpy.lock().unwrap();
+            handle_wrapper(s,locked_cpy);
+        }).join().unwrap();
     }
     Ok(())
 }

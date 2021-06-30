@@ -6,8 +6,10 @@ use std::io::prelude::*;
 use std::net::TcpStream;
 use std::sync::{Arc, Mutex, MutexGuard};
 use std::string::String;
-fn handle(s: TcpStream, mut shared_ingers: MutexGuard<HashMap<String,String>>)
+type Continuation = inger::Linger<u64, dyn FnMut(*mut Option<std::thread::Result<u64>>) + Send>;
+fn handle(s: TcpStream, mut stored_ingers: MutexGuard<HashMap<String,Continuation>>)
           -> Result<(),Box<dyn Display>> {
+
     let mut s = std::io::BufReader::new(s);
     let mut data = String::default();
     s.read_line(&mut data).map_err(box_error)?;
@@ -35,7 +37,7 @@ fn handle(s: TcpStream, mut shared_ingers: MutexGuard<HashMap<String,String>>)
         return Ok(())
     }
 
-    let f = inger::launch(|| func(func_arg), func_timeout);
+    let f = inger::launch(move || func(func_arg), func_timeout);
 
     match f {
         Ok(ans) => {
@@ -45,7 +47,7 @@ fn handle(s: TcpStream, mut shared_ingers: MutexGuard<HashMap<String,String>>)
             }
             else {
                 info!("TIMED-OUT"); //This is where the mutex needs to be used
-                shared_ingers.insert(String::default(),data);
+                stored_ingers.insert(data,ans.erase());
             }
         },
         Err(error) => error!("ERROR: caused by LIBINGER? {}",error),
@@ -58,7 +60,7 @@ fn box_error<'a,T: Display + 'a>(e: T) -> Box<dyn Display + 'a> {
     Box::new(e)
 }
 
-fn handle_wrapper(s: TcpStream, stored_ingers: MutexGuard<HashMap<String,String>>) {
+fn handle_wrapper(s: TcpStream, stored_ingers: MutexGuard<HashMap<String,Continuation>>) {
 
     if let Err(e) = handle(s, stored_ingers) {
         eprintln!("ERROR: {}",e);
@@ -66,8 +68,8 @@ fn handle_wrapper(s: TcpStream, stored_ingers: MutexGuard<HashMap<String,String>
 }
 
 fn main() -> std::io::Result<()> {
-                        /*The map is String -> ingers, but I have no idea why Continuation (return type?) needs a type arg; TODO: ask Sol*/
-    let stored_ingers: Arc<Mutex<HashMap<String,String>>> = Arc::new(Mutex::new(HashMap::new()));
+
+    let stored_ingers = Arc::new(Mutex::new(HashMap::new()));
     env_logger::init();
     let listener =  std::net::TcpListener::bind("0.0.0.0:2000")?;
     for s in listener.incoming() {

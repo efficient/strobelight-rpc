@@ -1,7 +1,12 @@
 #!/bin/sh
 
+sed=sed
+if type gsed >/dev/null 2>&1
+then 
+	sed=gsed
+fi
 for i in $(seq 0 5 20)
 do
     printf $i,
-    FUNC_ARG=$i cargo bench | tr -d , | gsed -n 's/^test \(\S\+\) \+\.\.\. bench: \+\([0-9]\+\) ns\/iter (+\/- \([0-9]\+\))$/\2,\3/p' | paste -s -d , - 
+    FUNC_ARG=$i cargo bench | tr -d , | $sed -n 's/^test \(\S\+\) \+\.\.\. bench: \+\([0-9]\+\) ns\/iter (+\/- \([0-9]\+\))$/\2,\3/p' | paste -s -d , - 
 done

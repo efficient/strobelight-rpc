@@ -1,12 +1,21 @@
 #!/bin/sh
-
+#Output function names as plot headers
 sed=sed
+first_iter=1
 if type gsed >/dev/null 2>&1
 then 
 	sed=gsed
 fi
+printf "Lib.inger RPC performance,time 10^6 n/s\n"
 for i in $(seq 0 5 20)
 do
+    output=$(FUNC_ARG=$i cargo bench | tr -d ,)
+    if test $first_iter == 1
+    then
+            echo "$output" | $sed -n 's/^test \(\S\+\) \+\.\.\. bench: \+\([0-9]\+\) ns\/iter (+\/- \([0-9]\+\))$/\1/p' | tr -s '\n' ','
+            printf '\n'
+	        first_iter=0
+    fi 
     printf $i,
-    FUNC_ARG=$i cargo bench | tr -d , | $sed -n 's/^test \(\S\+\) \+\.\.\. bench: \+\([0-9]\+\) ns\/iter (+\/- \([0-9]\+\))$/\2,\3/p' | paste -s -d , - 
-done
+    echo "$output" | $sed -n 's/^test \(\S\+\) \+\.\.\. bench: \+\([0-9]\+\) ns\/iter (+\/- \([0-9]\+\))$/\2,\3/p' | paste -s -d , -
+    done

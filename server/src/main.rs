@@ -41,13 +41,12 @@ fn handle(s: TcpStream, mut stored_ingers: MutexGuard<HashMap<String,Continuatio
     //
     let f = match stored_ingers.get_mut(&data) {
         Some(inger) => {
-            inger::resume(inger, func_timeout);
+            inger::resume(inger, func_timeout).map_err(box_error)?;
             inger
         },
         None => {
             let x = inger::launch(move || func(func_arg), func_timeout).map_err(box_error)?;
-            stored_ingers.insert(data.clone(),x.erase());
-            stored_ingers.get(&data).unwrap()
+            stored_ingers.entry(data).or_insert(x.erase())
         },
     };
 

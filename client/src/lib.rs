@@ -7,9 +7,9 @@ const ADDRESS: &str = "127.0.0.1:2000";
 pub fn rpc_client<'a, T: Iterator<Item = &'a str>>(mut args: T) -> std::io::Result<String> {
     let input_address = args.next();           //An address
     let request = IngerRequest {
-        func_id: args.next().unwrap_or("0"), //A u64 to be sent
-        func_arg: args.next().unwrap_or("0"), //A u64 to be sent
-        func_timeout: args.next().unwrap_or("10000"), //A u64 to be sent
+        func_id: args.next().unwrap_or("0"),
+        func_arg: args.next().unwrap_or("0"),
+        func_timeout: args.next().unwrap_or("10000"),
     };
 
     let mut address = ADDRESS;
@@ -19,10 +19,10 @@ pub fn rpc_client<'a, T: Iterator<Item = &'a str>>(mut args: T) -> std::io::Resu
 
     let mut s = TcpStream::connect(&address)?;
     s.write(format!("{}\n",serde_json::to_string(&request).unwrap()).as_ref()).unwrap();
-    let mut ans_buf = String::default();
 
+    let mut ans_buf = String::default();
     let client_timeout = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_nanos() + 10000;
-    while(SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_nanos()  < client_timeout) {
+    while SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_nanos()  < client_timeout {
         s.read_to_string(&mut ans_buf)?;
     }
     Ok(ans_buf)

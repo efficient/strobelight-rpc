@@ -7,6 +7,7 @@ use std::net::TcpStream;
 use std::sync::{Arc, Mutex, MutexGuard};
 use std::string::String;
 type Continuation = inger::Linger<u64, dyn FnMut(*mut Option<std::thread::Result<u64>>) + Send>;
+
 fn handle(s: TcpStream, mut stored_ingers: MutexGuard<HashMap<String,Continuation>>)
           -> Result<(),Box<dyn Display>> {
 
@@ -37,23 +38,30 @@ fn handle(s: TcpStream, mut stored_ingers: MutexGuard<HashMap<String,Continuatio
         return Ok(())
     }
 
-    let f = inger::launch(move || func(func_arg), func_timeout);
-
-    match f {
-        Ok(ans) => {
-            if let inger::Linger::Completion(ans) = ans {
-                s.get_mut().write(format!("{}",ans).as_ref()).map_err(box_error)?;
-                debug!("Yeilded the answer {}",ans);
-            }
-            else {
-                info!("TIMED-OUT"); //This is where the mutex needs to be used
-                stored_ingers.insert(data,ans.erase());
-            }
+    //
+    let f = match stored_ingers.get_mut(&data) {
+        Some(inger) => {
+            inger::resume(inger, func_timeout);
+            inger
         },
-        Err(error) => error!("ERROR: caused by LIBINGER? {}",error),
+        None => {
+            let x = inger::launch(move || func(func_arg), func_timeout).map_err(box_error)?;
+            stored_ingers.insert(data.clone(),x.erase());
+            stored_ingers.get(&data).unwrap()
+        },
+    };
+
+    if let inger::Linger::Completion(ans) = f {
+        s.get_mut().write(format!("{}",ans).as_ref()).map_err(box_error)?;
+        debug!("Yeilded the answer {}",ans);
+    }
+    else {
+        info!("TIMED-OUT"); //This is where the mutex needs to be used
     }
     Ok(())
 }
+
+
 
 fn box_error<'a,T: Display + 'a>(e: T) -> Box<dyn Display + 'a> {
 

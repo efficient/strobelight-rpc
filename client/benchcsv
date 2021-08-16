@@ -6,7 +6,7 @@ if type gsed >/dev/null 2>&1
 then 
 	sed=gsed
 fi
-printf "Lib.inger RPC performance,time 10^6 n/s\n"
+printf "Lib.inger RPC performance,duration by milliseconds" #TITLE,Y-axis
 for i in $(seq 0 5 20)
 do
     output=$(FUNC_ARG=$i cargo bench | tr -d ,)

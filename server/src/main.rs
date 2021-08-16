@@ -1,5 +1,5 @@
 use funs::IngerRequest;
-use log::{debug,error,info};
+use log::{debug,info};
 use std::collections::HashMap;
 use std::fmt::Display;
 use std::io::prelude::*;

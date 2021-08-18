@@ -24,13 +24,13 @@ fn fib_local(var: &mut bencher::Bencher) {
 fn fib_remote(var: &mut bencher::Bencher) {
 
     let args = get_env_args();
-    var.iter(|| client::rpc_client(args.clone()).unwrap());
+    var.iter(|| drop(client::rpc_client(args.clone())));
 }
 
 fn fib_remote_with_inger(var: &mut bencher::Bencher) {
 
     let args = get_env_args();
-    var.iter(|| client::rpc_client(args.clone()).unwrap());
+    var.iter(|| drop(client::rpc_client(args.clone())));
 }
 
 bencher::benchmark_group![client,fib_local,fib_remote,fib_remote_with_inger];

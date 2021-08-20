@@ -22,19 +22,19 @@ fn get_env_args(is_inger: bool) -> impl Iterator<Item = &'static str> + Clone {
 
 fn fib_local(var: &mut bencher::Bencher) {
 
-    var.iter(|| funs::fib(FUNC_ARG.parse().unwrap_or(1)));
+    var.iter(|| funs::fib(FUNC_ARG.parse().unwrap_or(1)))
 }
 
 fn fib_remote(var: &mut bencher::Bencher) {
 
     let args = get_env_args(false);
-    var.iter(|| drop(client::rpc_client(args.clone())));
+    var.iter(|| drop(client::rpc_client(args.clone())))
 }
 
 fn fib_remote_with_inger(var: &mut bencher::Bencher) {
 
     let args = get_env_args(true);
-    var.iter(|| drop(client::rpc_client(args.clone())));
+    var.iter(|| drop(client::rpc_client(args.clone())))
 }
 
 bencher::benchmark_group![client,fib_local,fib_remote,fib_remote_with_inger];

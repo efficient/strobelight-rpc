@@ -20,6 +20,12 @@ path = "../funs"
 [dependencies.inger]
 path = "../libinger"
 
+[dependencies.num_cpus]
+version = "1.13.0"
+
+[dependencies.threadpool]
+version = "1.8.1"
+
 [[bin]]
 name = "main"
 path = "src/main.rs"

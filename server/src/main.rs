@@ -6,6 +6,8 @@ use std::io::prelude::*;
 use std::net::TcpStream;
 use std::sync::{Arc, Mutex, MutexGuard};
 use std::string::String;
+use threadpool::{ThreadPool};
+use num_cpus::get_physical;
 type Continuation = inger::Linger<u64, dyn FnMut(*mut Option<std::thread::Result<u64>>) + Send>;
 
 fn handle(s: TcpStream, mut stored_ingers: MutexGuard<HashMap<String,Continuation>>)
@@ -78,14 +80,15 @@ fn main() -> std::io::Result<()> {
 
     let stored_ingers = Arc::new(Mutex::new(HashMap::new()));
     env_logger::init();
+    let pool = ThreadPool::new(get_physical());
     let listener =  std::net::TcpListener::bind("0.0.0.0:2000")?;
     for s in listener.incoming() {
         let s = s?;
         let shared_cpy = Arc::clone(&stored_ingers);
-        std::thread::spawn(move || {
+        pool.execute(move || {
             let locked_cpy = shared_cpy.lock().unwrap();
             handle_wrapper(s,locked_cpy);
-        }).join().unwrap();
+        });
     }
     Ok(())
 }

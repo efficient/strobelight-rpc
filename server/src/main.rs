@@ -6,7 +6,7 @@ use std::io::prelude::*;
 use std::net::TcpStream;
 use std::sync::{Arc, Mutex, MutexGuard};
 use std::string::String;
-use threadpool::{ThreadPool};
+use threadpool::ThreadPool;
 use num_cpus::get_physical;
 type Continuation = inger::Linger<u64, dyn FnMut(*mut Option<std::thread::Result<u64>>) + Send>;
 
@@ -78,8 +78,8 @@ fn handle_wrapper(s: TcpStream, stored_ingers: MutexGuard<HashMap<String,Continu
 
 fn main() -> std::io::Result<()> {
 
-    let stored_ingers = Arc::new(Mutex::new(HashMap::new()));
     env_logger::init();
+    let stored_ingers = Arc::new(Mutex::new(HashMap::new()));
     let pool = ThreadPool::new(get_physical());
     let listener =  std::net::TcpListener::bind("0.0.0.0:2000")?;
     for s in listener.incoming() {

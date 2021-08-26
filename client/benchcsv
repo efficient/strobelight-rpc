@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #Output function names as plot headers
 sed=sed
 first_iter=1

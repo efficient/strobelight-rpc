@@ -4,7 +4,8 @@ use std::net::TcpStream;
 const ADDRESS: &str = "127.0.0.1:2000";
 
 pub fn rpc_client<'a, T: Iterator<Item = &'a str>>(mut args: T) -> std::io::Result<String> {
-    let input_address = args.next();           //An address
+
+    let input_address = args.next();
     let request = IngerRequest {
         func_id: args.next().unwrap_or("0"),
         func_arg: args.next().unwrap_or("0"),

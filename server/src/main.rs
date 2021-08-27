@@ -40,10 +40,11 @@ fn handle(s: TcpStream, mut stored_ingers: MutexGuard<HashMap<String,Continuatio
         return Ok(())
     }
 
-    //
     let f = match stored_ingers.get_mut(&data) {
         Some(inger) => {
-            inger::resume(inger, func_timeout).map_err(box_error)?;
+            if inger.is_continuation() {
+               inger::resume(inger, func_timeout).map_err(box_error)?;
+            }
             inger
         },
         None => {
@@ -59,6 +60,7 @@ fn handle(s: TcpStream, mut stored_ingers: MutexGuard<HashMap<String,Continuatio
     else {
         info!("TIMED-OUT"); //This is where the mutex needs to be used
     }
+
     Ok(())
 }
 

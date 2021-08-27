@@ -4,13 +4,13 @@ use std::collections::HashMap;
 use std::fmt::Display;
 use std::io::prelude::*;
 use std::net::TcpStream;
-use std::sync::{Arc, Mutex, MutexGuard};
+use std::sync::{Arc, Mutex};
 use std::string::String;
 use threadpool::ThreadPool;
 use num_cpus::get;
 type Continuation = inger::Linger<u64, dyn FnMut(*mut Option<std::thread::Result<u64>>) + Send>;
 
-fn handle(s: TcpStream, mut stored_ingers: MutexGuard<HashMap<String,Continuation>>)
+fn handle(s: TcpStream, stored_ingers: Arc<Mutex<HashMap<String,Continuation>>>)
           -> Result<(),Box<dyn Display>> {
 
     let mut s = std::io::BufReader::new(s);
@@ -40,6 +40,7 @@ fn handle(s: TcpStream, mut stored_ingers: MutexGuard<HashMap<String,Continuatio
         return Ok(())
     }
 
+    let mut stored_ingers = stored_ingers.lock().unwrap();
     let f = match stored_ingers.get_mut(&data) {
         Some(inger) => {
             if inger.is_continuation() {
@@ -71,7 +72,7 @@ fn box_error<'a,T: Display + 'a>(e: T) -> Box<dyn Display + 'a> {
     Box::new(e)
 }
 
-fn handle_wrapper(s: TcpStream, stored_ingers: MutexGuard<HashMap<String,Continuation>>) {
+fn handle_wrapper(s: TcpStream, stored_ingers: Arc<Mutex<HashMap<String,Continuation>>>) {
 
     if let Err(e) = handle(s, stored_ingers) {
         eprintln!("ERROR: {}",e);
@@ -88,8 +89,7 @@ fn main() -> std::io::Result<()> {
         let s = s?;
         let shared_cpy = Arc::clone(&stored_ingers);
         pool.execute(move || {
-            let locked_cpy = shared_cpy.lock().unwrap();
-            handle_wrapper(s,locked_cpy);
+            handle_wrapper(s,shared_cpy);
         });
     }
     Ok(())

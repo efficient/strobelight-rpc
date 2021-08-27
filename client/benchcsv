@@ -8,7 +8,7 @@ then
 fi
 echo "Don't forget to taskset the server! consider mask 0xF8" >&2
 printf "Lib.inger RPC performance,time 10^6 n/s\n"
-for i in $(seq 0 5 20)
+for i in $(seq 0 5 35)
 do
     output=$(FUNC_ARG=$i taskset 0x1 cargo bench | tr -d ,)
     if test $first_iter == 1

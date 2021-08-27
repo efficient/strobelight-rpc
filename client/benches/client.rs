@@ -5,7 +5,7 @@ lazy_static! {
     static ref ADDRESS: String = env::var("ADDRESS").unwrap_or(String::from("localhost:2000"));
     static ref FUNC_ID: String = env::var("FUNC_ID").unwrap_or(String::from("1"));
     static ref FUNC_ARG: String = env::var("FUNC_ARG").unwrap_or(String::from("20"));
-    static ref FUNC_TIMEOUT: String = env::var("FUNC_TIMEOUT").unwrap_or(String::from("5000"));
+    static ref FUNC_TIMEOUT: String = env::var("FUNC_TIMEOUT").unwrap_or(String::from("500"));
 }
 
 fn get_env_args(is_inger: bool) -> impl Iterator<Item = &'static str> + Clone {

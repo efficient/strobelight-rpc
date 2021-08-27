@@ -9,7 +9,7 @@ pub fn rpc_client<'a, T: Iterator<Item = &'a str>>(mut args: T) -> std::io::Resu
     let request = IngerRequest {
         func_id: args.next().unwrap_or("0"),
         func_arg: args.next().unwrap_or("0"),
-        func_timeout: args.next().unwrap_or("10000"),
+        func_timeout: args.next().unwrap_or("500"),
     };
 
     let mut address = ADDRESS;
